@@ -1,0 +1,74 @@
+version: "3.9"
+
+services:
+  oracle:
+    image: gvenzl/oracle-xe:18-slim
+    container_name: oracle
+    environment:
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-oracle}
+    ports:
+      - "1521:1521"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-lc",
+          "echo 'select 1 from dual' | sqlplus -s system/${ORACLE_PASSWORD}@//localhost:1521/XE",
+        ]
+      interval: 30s
+      timeout: 30s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  clients:
+    build:
+      context: ./clients_service
+      dockerfile: Dockerfile.dev
+    container_name: clients
+    environment:
+      RAILS_ENV: development
+      DATABASE_HOST: ${DATABASE_HOST:-oracle}
+      ORACLE_USER: ${ORACLE_USER:-system}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-oracle}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      AUDIT_URL: ${AUDIT_URL:-http://audit:3002}
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./clients_service:/app
+    depends_on:
+      oracle:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mongo:
+        condition: service_started
+
+  audit:
+    build:
+      context: ./audit_service
+    environment:
+      RAILS_ENV: development
+      MONGO_URL: mongodb://mongo:27017/audit
+    ports:
+      - "3002:3002"
+    depends_on:
+      mongo:
+        condition: service_started
+
+volumes:
+  mongo_data:
