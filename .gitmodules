@@ -1,3 +1,6 @@
-[submodule "invoices_services"]
-	path = invoices_services
+[submodule "clients_service"]
+	path = clients_service
+	url = git@github.com:carlosRPDev/clients_service.git
+[submodule "invoices_service"]
+	path = invoices_service
 	url = git@github.com:carlosRPDev/invoices_service.git
