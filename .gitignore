@@ -1,0 +1,16 @@
+# Ignorar los microservicios
+audit_service/
+clients_service/
+invoices_service/
+
+# Ignorar archivos temporales y comunes de Rails o Docker
+*.log
+tmp/
+log/
+vendor/
+.bundle/
+node_modules/
+coverage/
+.env
+*.sqlite3
+.byebug_history

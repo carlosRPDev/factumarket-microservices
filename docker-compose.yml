@@ -8,6 +8,8 @@ services:
       ORACLE_PASSWORD: ${ORACLE_PASSWORD:-oracle}
     ports:
       - "1521:1521"
+    volumes:
+      - ./oracle_init/create_users.sql:/container-entrypoint-initdb.d/create_users.sql
     healthcheck:
       test:
         [
@@ -42,8 +44,8 @@ services:
     environment:
       RAILS_ENV: development
       DATABASE_HOST: ${DATABASE_HOST:-oracle}
-      ORACLE_USER: ${ORACLE_USER:-system}
-      ORACLE_PASSWORD: ${ORACLE_PASSWORD:-oracle}
+      ORACLE_USER: ${ORACLE_USER_CLIENTS:-system}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD_CLIENTS:-oracle}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
       AUDIT_URL: ${AUDIT_URL:-http://audit:3002}
     ports:
@@ -58,17 +60,45 @@ services:
       mongo:
         condition: service_started
 
-  audit:
+  invoices:
     build:
-      context: ./audit_service
+      context: ./invoices_service
+      dockerfile: Dockerfile.dev
+    container_name: invoices
     environment:
       RAILS_ENV: development
-      MONGO_URL: mongodb://mongo:27017/audit
+      DATABASE_HOST: ${DATABASE_HOST:-oracle}
+      ORACLE_USER: ${ORACLE_USER_INVOICES:-invoices_user}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD_INVOICES:-invoices_pwd}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      CLIENTS_URL: ${CLIENTS_URL:-http://clients:3000}
+      AUDIT_URL: ${AUDIT_URL:-http://audit:3002}
     ports:
-      - "3002:3002"
+      - "3001:3001"
+    volumes:
+      - ./invoices_service:/app
     depends_on:
+      oracle:
+        condition: service_healthy
+      redis:
+        condition: service_started
       mongo:
         condition: service_started
+      clients:
+        condition: service_started
+      
+
+  # audit:
+  #   build:
+  #     context: ./audit_service
+  #   environment:
+  #     RAILS_ENV: development
+  #     MONGO_URL: mongodb://mongo:27017/audit
+  #   ports:
+  #     - "3002:3002"
+  #   depends_on:
+  #     mongo:
+  #       condition: service_started
 
 volumes:
   mongo_data:
