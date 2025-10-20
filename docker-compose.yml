@@ -106,5 +106,45 @@ services:
       redis:
         condition: service_started
 
+  clients_sidekiq:
+    build:
+      context: ./clients_service
+      dockerfile: Dockerfile.dev
+    container_name: clients_sidekiq
+    command: bundle exec sidekiq
+    environment:
+      RAILS_ENV: development
+      DATABASE_HOST: ${DATABASE_HOST:-oracle}
+      ORACLE_USER: ${ORACLE_USER_CLIENTS:-system}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD_CLIENTS:-oracle}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      AUDIT_URL: ${AUDIT_URL:-http://audit:3002}
+    volumes:
+      - ./clients_service:/app
+    depends_on:
+      - redis
+      - oracle
+
+  invoices_sidekiq:
+    build:
+      context: ./invoices_service
+      dockerfile: Dockerfile.dev
+    container_name: invoices_sidekiq
+    command: bundle exec sidekiq
+    environment:
+      RAILS_ENV: development
+      DATABASE_HOST: ${DATABASE_HOST:-oracle}
+      ORACLE_USER: ${ORACLE_USER_INVOICES:-invoices_user}
+      ORACLE_PASSWORD: ${ORACLE_PASSWORD_INVOICES:-invoices_pwd}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      CLIENTS_URL: ${CLIENTS_URL:-http://clients:3000}
+      AUDIT_URL: ${AUDIT_URL:-http://audit:3002}
+    volumes:
+      - ./invoices_service:/app
+    depends_on:
+      - redis
+      - oracle
+      - clients
+
 volumes:
   mongo_data:
