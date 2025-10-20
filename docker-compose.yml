@@ -106,23 +106,5 @@ services:
       redis:
         condition: service_started
 
-  audit_sidekiq:
-    build:
-      context: ./audit_service
-      dockerfile: Dockerfile.dev
-    container_name: audit_sidekiq
-    command: bundle exec sidekiq
-    environment:
-      RAILS_ENV: development
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
-      MONGODB_URL: ${MONGODB_URL:-mongodb://mongo:27017/audit_db}
-    volumes:
-      - ./audit_service:/app
-    depends_on:
-      mongo:
-        condition: service_started
-      redis:
-        condition: service_started
-
 volumes:
   mongo_data:
