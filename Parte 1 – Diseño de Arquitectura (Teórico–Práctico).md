@@ -68,9 +68,9 @@ Esto permite que los microservicios envíen los eventos a la cola sin bloquear l
 ### 🔹 Ejemplo de Flujo Asíncrono
 
 1. El servicio de **Facturas** crea una nueva factura en Oracle.
-2. Una vez creada, se encola un *job* (`RegistrarEventoAuditoriaJob`) con los datos del evento.
+2. Una vez creada, se encola un *job* (`RegisterEventAuditJob`) con los datos del evento.
 3. Sidekiq procesa el *job* en segundo plano.
-4. El *job* realiza una llamada HTTP (`POST /auditoria/eventos`) al servicio de **Auditoría** enviando el evento en formato JSON.
+4. El *job* realiza una llamada HTTP (`POST /audit/events`) al servicio de **Auditoría** enviando el evento en formato JSON.
 
 El servicio de Auditoría almacena el evento en MongoDB.
 
