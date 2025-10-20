@@ -4,3 +4,6 @@
 [submodule "invoices_service"]
 	path = invoices_service
 	url = git@github.com:carlosRPDev/invoices_service.git
+[submodule "audit_service"]
+	path = audit_service
+	url = git@github.com:carlosRPDev/audit_service.git
