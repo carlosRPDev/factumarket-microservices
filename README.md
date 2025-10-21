@@ -102,16 +102,26 @@ URLs bases:
 
 ---
 
-## 🧩 Arquitectura general
+## 🧩 Principios de Diseño Aplicados
 
-El sistema está basado en una **arquitectura de microservicios desacoplada**, donde cada servicio gestiona su propio dominio y base de datos.
-La comunicación entre ellos se realiza vía **HTTP** y **Jobs asíncronos** utilizando **Redis + Sidekiq**.
+### 🧠 Clean Architecture
 
-### Flujo general de eventos
+- Separación entre **lógica de negocio**, **infraestructura** y **framework**.
+- Independencia de frameworks y bases de datos.
+- Comunicación entre capas mediante interfaces bien definidas.
 
-1. **Clients Service** crea o consulta un cliente en Oracle.
-2. **Invoices Service** emite una factura asociada a un cliente y registra el evento en el **Audit Service**.
-3. **Audit Service** almacena los logs de auditoría en **MongoDB**, centralizando los eventos del sistema.
+### 🏗️ MVC (Model-View-Controller)
+
+- Los controladores exponen endpoints REST.
+- Los modelos representan entidades persistentes (clientes, facturas, auditorías).
+- Las vistas se utilizan para layouts básicos o respuestas de correo (mailer).
+
+### 🌐 Microservicios
+
+- Cada servicio se despliega de forma **independiente**.
+- Comunicación entre servicios mediante **HTTP (HTTParty)**.
+- Uso de **Jobs en background** para registrar eventos en el servicio de auditoría (`register_event_audit_job`).
+- Bases de datos **autónomas** y **desacopladas** (Oracle / MongoDB)
 
 ---
 
